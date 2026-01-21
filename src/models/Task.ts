@@ -1,0 +1,55 @@
+import mongoose from 'mongoose';
+
+const commentSchema = new mongoose.Schema({
+  authorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  }
+}, { _id: true });
+
+const TaskSchema = new mongoose.Schema({
+  projectId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+    required: true,
+  },
+  parentTaskId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Task",
+    default: null,
+  },
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: String,
+  status: {
+    type: String,
+    enum: ["todo", "in-progress", "done"],
+    default: "todo",
+  },
+  priority: {
+    type: String,
+    enum: ["low", "medium", "high"],
+    default: "medium",
+  },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  dueDate: Date,
+  comments: [commentSchema],
+}, { timestamps: true });
+
+export default mongoose.models.Task || mongoose.model("Task", TaskSchema);
