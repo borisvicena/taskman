@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import { Project } from "@/lib/types";
 import Toolbar from "./toolbar";
 import { ProjectCard } from "./project-card";
@@ -10,6 +13,29 @@ interface DashboardContentProps {
 }
 
 export function DashboardContent({ projects, userId }: DashboardContentProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const filteredProjects = useMemo(() => {
+    let result = projects;
+
+    // Apply search filter
+    if (searchQuery) {
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      result = result.filter((p) => p.status === statusFilter);
+    }
+
+    return result;
+  }, [projects, searchQuery, statusFilter]);
+
   const hasProjects = projects && projects.length > 0;
 
   return (
@@ -28,16 +54,36 @@ export function DashboardContent({ projects, userId }: DashboardContentProps) {
       {hasProjects && <DashboardStats projects={projects} />}
 
       {/* Toolbar */}
-      <Toolbar />
+      <Toolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+      />
 
       {/* Projects Grid */}
       {hasProjects ? (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Your Projects</h2>
+          <h2 className="text-lg font-semibold">
+            Your Projects
+            {filteredProjects.length !== projects.length && (
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                ({filteredProjects.length} of {projects.length})
+              </span>
+            )}
+          </h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project: Project) => (
-              <ProjectCard key={project._id} project={project} userId={userId} />
-            ))}
+            {filteredProjects.length > 0 ? (
+              filteredProjects.map((project: Project) => (
+                <ProjectCard key={project._id} project={project} userId={userId} />
+              ))
+            ) : (
+              <div className="col-span-full flex min-h-[200px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 p-8 text-center">
+                <p className="text-muted-foreground">
+                  No projects match your filters
+                </p>
+              </div>
+            )}
           </div>
         </div>
       ) : (

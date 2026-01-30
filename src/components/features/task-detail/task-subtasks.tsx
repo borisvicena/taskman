@@ -15,13 +15,15 @@ import { useState } from "react";
 import { SubtaskTable } from "./subtask-table";
 import AddSubtaskForm from "./forms/add-subtask-form";
 import { Badge } from "@/components/ui/badge";
+import { Project } from "@/lib/types";
 
 type TaskSubtasksProps = {
   task: Task;
   subtasks: Task[];
+  project: Project;
 };
 
-export function TaskSubtasks({ task, subtasks }: TaskSubtasksProps) {
+export function TaskSubtasks({ task, subtasks, project }: TaskSubtasksProps) {
   const [open, setOpen] = useState(false);
 
   const completedSubtasks = subtasks.filter((s) => s.status === "done").length;
@@ -61,6 +63,7 @@ export function TaskSubtasks({ task, subtasks }: TaskSubtasksProps) {
               <AddSubtaskForm
                 projectId={task.projectId}
                 parentTaskId={task._id}
+                project={project}
                 onSuccess={() => setOpen(false)}
               />
             </DialogContent>
@@ -69,7 +72,7 @@ export function TaskSubtasks({ task, subtasks }: TaskSubtasksProps) {
       </CardHeader>
 
       <CardContent>
-        <SubtaskTable subtasks={subtasks} projectId={task.projectId} />
+        <SubtaskTable subtasks={subtasks} projectId={task.projectId} project={project} />
       </CardContent>
     </Card>
   );

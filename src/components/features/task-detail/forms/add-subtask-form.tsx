@@ -16,21 +16,26 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { Project } from "@/lib/types";
 
 type Props = {
   projectId: string;
   parentTaskId: string;
+  project: Project;
   onSuccess?: () => void;
 };
 
 export default function AddSubtaskForm({
   projectId,
   parentTaskId,
+  project,
   onSuccess,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +117,28 @@ export default function AddSubtaskForm({
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="assignedTo">Assigned To</Label>
+          <Select name="assignedTo">
+            <SelectTrigger>
+              <SelectValue placeholder="Unassigned (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Team Members</SelectLabel>
+                <SelectItem value={project.ownerId}>
+                  {project.ownerName || "Project Owner"} (Owner)
+                </SelectItem>
+                {project.members?.map((member) => (
+                  <SelectItem key={member.userId} value={member.userId}>
+                    {member.userName || "Unknown"} ({member.role})
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">

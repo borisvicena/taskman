@@ -17,14 +17,12 @@ export default async function ListDetailPage({ params }: Props) {
   const userId = session.userId;
 
   const projectDetails = await getProjectDetails(id);
-  console.log("Project details", projectDetails);
 
   if (!projectDetails) {
     notFound();
   }
 
   const projectWithTasks = await getProjectDetailsWithTasks(id);
-  console.log("Project with tasks", projectWithTasks);
 
   if (!projectWithTasks) {
     notFound();

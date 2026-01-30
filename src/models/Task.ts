@@ -22,11 +22,13 @@ const TaskSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Project",
     required: true,
+    index: true,
   },
   parentTaskId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Task",
     default: null,
+    index: true,
   },
   title: {
     type: String,

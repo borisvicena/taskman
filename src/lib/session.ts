@@ -4,6 +4,9 @@ import { SessionPayload } from "@/lib/definitions";
 import { cookies } from "next/headers";
 
 const secretKey = process.env.SESSION_SECRET;
+if (!secretKey) {
+  throw new Error("SESSION_SECRET environment variable is required");
+}
 const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function encrypt(payload: SessionPayload) {

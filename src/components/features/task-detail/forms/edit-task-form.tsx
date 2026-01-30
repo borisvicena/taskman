@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { createTask } from "@/lib/actions/task";
+import { updateTask } from "@/lib/actions/task";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -23,15 +23,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { Project } from "@/lib/types";
+import { Task, Project } from "@/lib/types";
 
 type Props = {
-  projectId: string;
+  task: Task;
   project: Project;
   onSuccess?: () => void;
 };
 
-export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
+export default function EditTaskForm({ task, project, onSuccess }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const result = await createTask(projectId, formData);
+      const result = await updateTask(task._id, formData);
 
       if (result.error) {
         setError(result.error);
@@ -55,8 +55,8 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <DialogHeader>
-        <DialogTitle>New Task</DialogTitle>
-        <DialogDescription>Add a new task to your project.</DialogDescription>
+        <DialogTitle>Edit Task</DialogTitle>
+        <DialogDescription>Update the task details.</DialogDescription>
       </DialogHeader>
 
       <div className="py-4">
@@ -65,7 +65,8 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
           <Input
             id="title"
             name="title"
-            placeholder="Task Alpha"
+            placeholder="Task title"
+            defaultValue={task.title}
             autoFocus
             tabIndex={1}
           />
@@ -79,6 +80,7 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
             id="description"
             name="description"
             placeholder="Describe the task..."
+            defaultValue={task.description}
             tabIndex={2}
           />
         </div>
@@ -87,7 +89,7 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
       <div className="py-4">
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <Select name="status">
+          <Select name="status" defaultValue={task.status}>
             <SelectTrigger id="status" tabIndex={3} className="w-full">
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
@@ -106,7 +108,7 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
       <div className="py-4">
         <div className="space-y-2">
           <Label htmlFor="priority">Priority</Label>
-          <Select name="priority">
+          <Select name="priority" defaultValue={task.priority}>
             <SelectTrigger id="priority" tabIndex={4} className="w-full">
               <SelectValue placeholder="Select priority" />
             </SelectTrigger>
@@ -125,9 +127,9 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
       <div className="py-4">
         <div className="space-y-2">
           <Label htmlFor="assignedTo">Assigned To</Label>
-          <Select name="assignedTo">
+          <Select name="assignedTo" defaultValue={task.assignedTo?._id || undefined}>
             <SelectTrigger id="assignedTo" tabIndex={5} className="w-full">
-              <SelectValue placeholder="Select team member (optional)" />
+              <SelectValue placeholder="Unassigned (optional)" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -148,24 +150,17 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
 
       <div className="py-4">
         <div className="space-y-2">
-          <Label htmlFor="parentTaskId">Parent Task</Label>
-          <Input
-            id="parentTaskId"
-            name="parentTaskId"
-            placeholder="Parent Task ID (optional)"
-            tabIndex={6}
-          />
-        </div>
-      </div>
-
-      <div className="py-4">
-        <div className="space-y-2">
           <Label htmlFor="dueDate">Due Date</Label>
           <Input
             id="dueDate"
             name="dueDate"
             type="date"
-            tabIndex={7}
+            defaultValue={
+              task.dueDate
+                ? new Date(task.dueDate).toISOString().split("T")[0]
+                : ""
+            }
+            tabIndex={6}
           />
         </div>
       </div>
@@ -175,9 +170,9 @@ export default function AddTaskForm({ projectId, project, onSuccess }: Props) {
       )}
 
       <DialogFooter>
-        <Button type="submit" disabled={isPending} tabIndex={8}>
+        <Button type="submit" disabled={isPending} tabIndex={7}>
           {isPending && <Spinner />}
-          Create Task
+          Update Task
         </Button>
       </DialogFooter>
     </form>

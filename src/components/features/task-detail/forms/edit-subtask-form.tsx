@@ -16,19 +16,22 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { Task } from "@/lib/types";
+import { Task, Project } from "@/lib/types";
 
 type Props = {
   subtask: Task;
+  project: Project;
   onSuccess?: () => void;
 };
 
-export default function EditSubtaskForm({ subtask, onSuccess }: Props) {
+export default function EditSubtaskForm({ subtask, project, onSuccess }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -107,6 +110,28 @@ export default function EditSubtaskForm({ subtask, onSuccess }: Props) {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="assignedTo">Assigned To</Label>
+          <Select name="assignedTo" defaultValue={subtask.assignedTo?._id || undefined}>
+            <SelectTrigger>
+              <SelectValue placeholder="Unassigned (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Team Members</SelectLabel>
+                <SelectItem value={project.ownerId}>
+                  {project.ownerName || "Project Owner"} (Owner)
+                </SelectItem>
+                {project.members?.map((member) => (
+                  <SelectItem key={member.userId} value={member.userId}>
+                    {member.userName || "Unknown"} ({member.role})
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">

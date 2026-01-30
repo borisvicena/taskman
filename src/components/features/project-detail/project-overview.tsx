@@ -226,17 +226,18 @@ export function ProjectOverview({
                   <div className="flex items-center gap-2 rounded-full border-2 border-primary bg-primary/10 pl-1 pr-3 py-1">
                     <Avatar className="h-7 w-7">
                       <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                        {getInitials("Owner")}
+                        {getInitials(project.ownerName || "Owner")}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <span className="text-xs font-medium">Owner</span>
+                      <span className="text-xs font-medium">{project.ownerName || "Owner"}</span>
                       <span className="text-[10px] text-muted-foreground">Full Access</span>
                     </div>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Project Owner - Full Access</p>
+                  <p>{project.ownerName || "Project Owner"} - {project.ownerEmail || "No email"}</p>
+                  <p className="text-xs text-muted-foreground">Project Owner - Full Access</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -249,11 +250,11 @@ export function ProjectOverview({
                     <div className="flex items-center gap-2 rounded-full border bg-card pl-1 pr-3 py-1 hover:bg-accent transition-colors">
                       <Avatar className="h-7 w-7">
                         <AvatarFallback className="bg-muted text-xs">
-                          {getInitials(`Member ${index + 1}`)}
+                          {getInitials(member.userName || `Member ${index + 1}`)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="text-xs font-medium">Member {index + 1}</span>
+                        <span className="text-xs font-medium">{member.userName || `Member ${index + 1}`}</span>
                         <span className="text-[10px] text-muted-foreground capitalize">
                           {member.role}
                         </span>
@@ -261,7 +262,8 @@ export function ProjectOverview({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="capitalize">{member.role} - Can {member.role === "editor" ? "edit and create" : "view only"}</p>
+                    <p>{member.userName || "Unknown Member"} - {member.userEmail || "No email"}</p>
+                    <p className="text-xs capitalize text-muted-foreground">{member.role} - Can {member.role === "editor" ? "edit and create" : "view only"}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

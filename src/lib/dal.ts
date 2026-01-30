@@ -70,20 +70,47 @@ export const getProjects = cache(async () => {
     .sort({ updatedAt: -1 })
     .lean();
 
-    return projects.map((project) => ({
-      _id: project._id.toString(),
-      name: project.name,
-      description: project.description,
-      status: project.status,
-      dueDate: project.dueDate || new Date(),
-      ownerId: project.ownerId._id.toString(),
-      members: project.members.map((member: any) => ({
-        userId: member.userId._id.toString(),
-        role: member.role,
-      })),
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-    }));
+    // Get task stats for each project
+    const projectIds = projects.map((p) => p._id);
+
+    const taskStats = await Task.aggregate([
+      { $match: { projectId: { $in: projectIds } } },
+      {
+        $group: {
+          _id: "$projectId",
+          totalTasks: { $sum: 1 },
+          completedTasks: {
+            $sum: { $cond: [{ $eq: ["$status", "done"] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    // Create a map for quick lookup
+    const taskStatsMap = new Map(
+      taskStats.map((stat) => [stat._id.toString(), stat])
+    );
+
+    return projects.map((project) => {
+      const stats = taskStatsMap.get(project._id.toString());
+
+      return {
+        _id: project._id.toString(),
+        name: project.name,
+        description: project.description,
+        status: project.status,
+        dueDate: project.dueDate || null,
+        ownerId: project.ownerId._id.toString(),
+        members: project.members.map((member: any) => ({
+          userId: member.userId._id.toString(),
+          role: member.role,
+        })),
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+        totalTasks: stats?.totalTasks || 0,
+        completedTasks: stats?.completedTasks || 0,
+      };
+    });
   } catch (error) {
     console.error("Failed to get projects", error);
     return [];
@@ -119,10 +146,14 @@ export const getProjectDetails = cache(async (projectId: string) => {
       name: project.name,
       description: project.description,
       status: project.status,
-      dueDate: project.dueDate || new Date(),
+      dueDate: project.dueDate || null,
       ownerId: project.ownerId._id.toString(),
+      ownerName: project.ownerId.name,
+      ownerEmail: project.ownerId.email,
       members: project.members.map((member: any) => ({
         userId: member.userId._id.toString(),
+        userName: member.userId.name,
+        userEmail: member.userId.email,
         role: member.role,
       })),
       createdAt: project.createdAt,

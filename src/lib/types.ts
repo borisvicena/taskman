@@ -27,6 +27,8 @@ export interface Comment {
 
 export interface Member {
   userId: string;
+  userName?: string;
+  userEmail?: string;
   role: string;
 }
 
@@ -35,11 +37,15 @@ export interface Project {
   name: string;
   description: string;
   ownerId: string;
+  ownerName?: string;
+  ownerEmail?: string;
   members: Member[];
   status: ProjectStatus;
-  dueDate: Date;
+  dueDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  totalTasks?: number;
+  completedTasks?: number;
 }
 
 export interface Task {

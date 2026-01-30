@@ -32,10 +32,10 @@ export function TaskDetailContent({
             <span>Back to {project.name}</span>
           </Link>
 
-          <TaskHeader task={task} />
+          <TaskHeader task={task} project={project} />
 
           <div className="grid gap-6 lg:grid-cols-1">
-            <TaskSubtasks task={task} subtasks={subtasks} />
+            <TaskSubtasks task={task} subtasks={subtasks} project={project} />
             <TaskComments task={task} />
           </div>
         </div>

@@ -50,8 +50,6 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  console.log(user);
-
   return (
     <Card>
       <CardHeader>
@@ -79,7 +77,7 @@ export default async function ProfilePage() {
                 Active
               </span>
               <span className="text-xs text-muted-foreground">
-                Member since Jan 2024
+                Member since {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
               </span>
             </div>
           </div>
@@ -89,11 +87,19 @@ export default async function ProfilePage() {
 
         <div className="grid gap-1 sm:grid-cols-2">
           <InfoRow icon={Mail} label="Email" value={user.email} />
-          <InfoRow icon={Calendar} label="Joined" value="January 1, 2024" />
+          <InfoRow
+            icon={Calendar}
+            label="Joined"
+            value={new Date(user.createdAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric"
+            })}
+          />
           <InfoRow
             icon={Clock}
             label="Last active"
-            value={new Date().toLocaleDateString("en-US", {
+            value={new Date().toLocaleString("en-US", {
               month: "short",
               day: "numeric",
               hour: "numeric",

@@ -14,7 +14,19 @@ import {
 } from "@/components/ui/select";
 import CreateProjectForm from "@/components/features/dashboard/forms/create-project-form";
 
-export default function Toolbar() {
+interface ToolbarProps {
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  statusFilter: string;
+  onStatusChange: (value: string) => void;
+}
+
+export default function Toolbar({
+  searchQuery,
+  onSearchChange,
+  statusFilter,
+  onStatusChange,
+}: ToolbarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,13 +39,15 @@ export default function Toolbar() {
             type="text"
             placeholder="Search projects..."
             className="pl-9 bg-background"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
 
         {/* Filter by Status */}
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select defaultValue="all">
+          <Select value={statusFilter} onValueChange={onStatusChange}>
             <SelectTrigger className="w-35 bg-background">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>

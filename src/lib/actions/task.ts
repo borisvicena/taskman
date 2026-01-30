@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { verifySession } from "@/lib/dal";
 import { connectDB } from "@/lib/mongodb";
+import { isValidObjectId } from "@/lib/validation";
 import Project from "@/models/Project";
 import Task from "@/models/Task";
 
@@ -12,6 +13,10 @@ export async function createTask(projectId: string, formData: FormData) {
 
   if (!session.isAuth) {
     return { error: "Unauthorized" };
+  }
+
+  if (!isValidObjectId(projectId)) {
+    return { error: "Invalid project ID" };
   }
 
   const title = formData.get("title") as string;
@@ -56,6 +61,20 @@ export async function createTask(projectId: string, formData: FormData) {
       }
     }
 
+    // Validate parent task if provided
+    if (parentTaskId) {
+      if (!isValidObjectId(parentTaskId)) {
+        return { error: "Invalid parent task ID" };
+      }
+      const parentTask = await Task.findById(parentTaskId);
+      if (!parentTask) {
+        return { error: "Parent task not found" };
+      }
+      if (parentTask.projectId.toString() !== projectId) {
+        return { error: "Parent task must belong to the same project" };
+      }
+    }
+
     // Create the task
     const task = await Task.create({
       projectId,
@@ -85,6 +104,10 @@ export async function updateTask(taskId: string, formData: FormData) {
 
   if (!session.isAuth) {
     return { error: "Unauthorized" };
+  }
+
+  if (!isValidObjectId(taskId)) {
+    return { error: "Invalid task ID" };
   }
 
   const title = formData.get("title") as string;
@@ -170,6 +193,10 @@ export async function deleteTask(taskId: string) {
     return { error: "Unauthorized" };
   }
 
+  if (!isValidObjectId(taskId)) {
+    return { error: "Invalid task ID" };
+  }
+
   try {
     await connectDB();
 
@@ -207,6 +234,9 @@ export async function deleteTask(taskId: string) {
 
     const projectId = task.projectId;
 
+    // Delete all subtasks first (cascade delete)
+    await Task.deleteMany({ parentTaskId: taskId });
+
     // Delete the task
     await Task.findByIdAndDelete(taskId);
 
@@ -226,6 +256,10 @@ export async function addTaskComment(taskId: string, content: string) {
 
   if (!session.isAuth) {
     return { error: "Unauthorized" };
+  }
+
+  if (!isValidObjectId(taskId)) {
+    return { error: "Invalid task ID" };
   }
 
   if (!content || content.trim() === "") {
@@ -283,6 +317,14 @@ export async function deleteTaskComment(taskId: string, commentId: string) {
     return { error: "Unauthorized" };
   }
 
+  if (!isValidObjectId(taskId)) {
+    return { error: "Invalid task ID" };
+  }
+
+  if (!isValidObjectId(commentId)) {
+    return { error: "Invalid comment ID" };
+  }
+
   try {
     await connectDB();
 
@@ -303,7 +345,12 @@ export async function deleteTaskComment(taskId: string, commentId: string) {
 
     // Only comment author or project owner can delete
     const project = await Project.findById(task.projectId);
-    const isProjectOwner = project?.ownerId.toString() === session.userId;
+
+    if (!project) {
+      return { error: "Project not found" };
+    }
+
+    const isProjectOwner = project.ownerId.toString() === session.userId;
     const isCommentAuthor = comment.authorId.toString() === session.userId;
 
     if (!isProjectOwner && !isCommentAuthor) {

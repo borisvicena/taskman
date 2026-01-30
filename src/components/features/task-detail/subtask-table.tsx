@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Task } from "@/lib/types";
+import { Task, Project } from "@/lib/types";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -27,9 +28,10 @@ import DeleteSubtaskButton from "./delete-subtask-button";
 type SubtaskTableProps = {
   subtasks: Task[];
   projectId: string;
+  project: Project;
 };
 
-export function SubtaskTable({ subtasks, projectId }: SubtaskTableProps) {
+export function SubtaskTable({ subtasks, projectId, project }: SubtaskTableProps) {
   if (!subtasks || subtasks.length === 0) {
     return (
       <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
@@ -44,8 +46,10 @@ export function SubtaskTable({ subtasks, projectId }: SubtaskTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Task Name</TableHead>
+            <TableHead>Assigned To</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Priority</TableHead>
+            <TableHead>Due Date</TableHead>
             <TableHead className="w-25">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -55,6 +59,7 @@ export function SubtaskTable({ subtasks, projectId }: SubtaskTableProps) {
               key={subtask._id}
               subtask={subtask}
               projectId={projectId}
+              project={project}
             />
           ))}
         </TableBody>
@@ -66,14 +71,22 @@ export function SubtaskTable({ subtasks, projectId }: SubtaskTableProps) {
 type SubtaskRowProps = {
   subtask: Task;
   projectId: string;
+  project: Project;
 };
 
-function SubtaskRow({ subtask, projectId }: SubtaskRowProps) {
+function SubtaskRow({ subtask, projectId, project }: SubtaskRowProps) {
   const [editOpen, setEditOpen] = useState(false);
 
   return (
     <TableRow>
       <TableCell className="font-medium">{subtask.title}</TableCell>
+      <TableCell>
+        <span className="text-sm text-muted-foreground">
+          {subtask.assignedTo?.name || (
+            <span className="italic">Unassigned</span>
+          )}
+        </span>
+      </TableCell>
       <TableCell>
         <Badge variant="outline">
           <div className="capitalize">{subtask.status}</div>
@@ -83,6 +96,15 @@ function SubtaskRow({ subtask, projectId }: SubtaskRowProps) {
         <Badge variant="outline">
           <div className="capitalize">{subtask.priority}</div>
         </Badge>
+      </TableCell>
+      <TableCell>
+        {subtask.dueDate ? (
+          <span className="text-sm font-medium">
+            {format(new Date(subtask.dueDate), "MMM dd, yyyy")}
+          </span>
+        ) : (
+          <span className="text-sm text-muted-foreground italic">No date</span>
+        )}
       </TableCell>
       <TableCell>
         <DropdownMenu>
@@ -106,6 +128,7 @@ function SubtaskRow({ subtask, projectId }: SubtaskRowProps) {
               <DialogContent className="sm:max-w-md">
                 <EditSubtaskForm
                   subtask={subtask}
+                  project={project}
                   onSuccess={() => setEditOpen(false)}
                 />
               </DialogContent>

@@ -279,12 +279,33 @@ function SubtaskRow({ subtask, projectId, onRowClick }: SubtaskRowProps) {
     }
   };
 
+  const getPriorityConfig = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return {
+          className: "bg-red-50 text-red-700 border-red-200",
+        };
+      case "medium":
+        return {
+          className: "bg-orange-50 text-orange-700 border-orange-200",
+        };
+      case "low":
+        return {
+          className: "bg-slate-50 text-slate-700 border-slate-200",
+        };
+      default:
+        return {
+          className: "bg-gray-50 text-gray-700 border-gray-200",
+        };
+    }
+  };
+
   const statusConfig = getStatusConfig(subtask.status);
+  const priorityConfig = getPriorityConfig(subtask.priority);
 
   return (
     <TableRow
-      className="cursor-pointer bg-muted/20 hover:bg-muted/40 transition-colors border-b border-dashed"
-      onClick={(e) => onRowClick(subtask._id, e)}
+      className="bg-muted/20 border-b border-dashed"
     >
       <TableCell className="py-3"></TableCell>
       <TableCell className="py-3">
@@ -293,12 +314,32 @@ function SubtaskRow({ subtask, projectId, onRowClick }: SubtaskRowProps) {
           <p className="text-sm font-medium text-muted-foreground">{subtask.title}</p>
         </div>
       </TableCell>
-      <TableCell className="py-3" colSpan={3}>
+      <TableCell className="py-3">
+        <span className="text-sm text-muted-foreground">
+          {subtask.assignedTo?.name || (
+            <span className="italic">Unassigned</span>
+          )}
+        </span>
+      </TableCell>
+      <TableCell className="py-3">
         <Badge className={`${statusConfig.className} text-xs`}>
           <span className="capitalize">{subtask.status.replace("-", " ")}</span>
         </Badge>
       </TableCell>
-      <TableCell className="py-3"></TableCell>
+      <TableCell className="py-3">
+        <Badge className={`${priorityConfig.className} text-xs`}>
+          <span className="capitalize">{subtask.priority}</span>
+        </Badge>
+      </TableCell>
+      <TableCell className="py-3">
+        {subtask.dueDate ? (
+          <span className="text-sm font-medium">
+            {format(new Date(subtask.dueDate), "MMM dd, yyyy")}
+          </span>
+        ) : (
+          <span className="text-sm text-muted-foreground italic">No date</span>
+        )}
+      </TableCell>
     </TableRow>
   );
 }

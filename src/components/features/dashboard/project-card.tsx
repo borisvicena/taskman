@@ -77,6 +77,12 @@ export function ProjectCard({ project, userId }: ProjectCardProps) {
 
   const statusConfig = getStatusConfig(project.status);
 
+  // Calculate actual progress from task data
+  const progress =
+    project.totalTasks && project.totalTasks > 0
+      ? Math.round((project.completedTasks! / project.totalTasks) * 100)
+      : 0;
+
   const handleCardClick = () => {
     router.push(`/dashboard/projects/${project._id}`);
   };
@@ -110,7 +116,7 @@ export function ProjectCard({ project, userId }: ProjectCardProps) {
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuItem asChild>
                   <Link
                     href={`/dashboard/projects/${project._id}`}
@@ -141,9 +147,9 @@ export function ProjectCard({ project, userId }: ProjectCardProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground font-medium">Progress</span>
-              <span className="font-semibold">30%</span>
+              <span className="font-semibold">{progress}%</span>
             </div>
-            <Progress value={30} className="h-2" />
+            <Progress value={progress} className="h-2" />
           </div>
         </CardContent>
 

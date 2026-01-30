@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { verifySession } from "@/lib/dal";
 import { connectDB } from "@/lib/mongodb";
+import { isValidObjectId } from "@/lib/validation";
 import Project from "@/models/Project";
 import Task from "@/models/Task";
 
@@ -12,7 +13,7 @@ export async function createProject(prevState: any, formData: FormData) {
   const session = await verifySession();
 
   if (!session.isAuth) {
-    return { message: "Unauthorized" };
+    return { error: "Unauthorized" };
   }
 
   const name = formData.get("name") as string;
@@ -41,7 +42,7 @@ export async function createProject(prevState: any, formData: FormData) {
     return { success: true, projectId: project._id.toString() };
   } catch (error) {
     console.error("Failed to create project:", error);
-    return { message: "Failed to create project" };
+    return { error: "Failed to create project" };
   }
 }
 
@@ -51,6 +52,10 @@ export async function updateProject(projectId: string, formData: FormData) {
 
   if (!session.isAuth) {
     return { error: "Unauthorized" };
+  }
+
+  if (!isValidObjectId(projectId)) {
+    return { error: "Invalid project ID" };
   }
 
   const name = formData.get("name") as string;
@@ -103,6 +108,10 @@ export async function deleteProject(projectId: string) {
     return { error: "Unauthorized" };
   }
 
+  if (!isValidObjectId(projectId)) {
+    return { error: "Invalid project ID" };
+  }
+
   try {
     await connectDB();
 
@@ -138,6 +147,10 @@ export async function addProjectMember(projectId: string, emailOrUserId: string,
 
   if (!session.isAuth) {
     return { error: "Unauthorized" };
+  }
+
+  if (!isValidObjectId(projectId)) {
+    return { error: "Invalid project ID" };
   }
 
   try {
@@ -204,6 +217,14 @@ export async function removeProjectMember(projectId: string, userId: string) {
     return { error: "Unauthorized" };
   }
 
+  if (!isValidObjectId(projectId)) {
+    return { error: "Invalid project ID" };
+  }
+
+  if (!isValidObjectId(userId)) {
+    return { error: "Invalid user ID" };
+  }
+
   try {
     await connectDB();
 
@@ -240,6 +261,14 @@ export async function updateMemberRole(projectId: string, userId: string, role: 
 
   if (!session.isAuth) {
     return { error: "Unauthorized" };
+  }
+
+  if (!isValidObjectId(projectId)) {
+    return { error: "Invalid project ID" };
+  }
+
+  if (!isValidObjectId(userId)) {
+    return { error: "Invalid user ID" };
   }
 
   try {

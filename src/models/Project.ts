@@ -35,10 +35,14 @@ const ProjectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true,
   },
 
   members: [projectMemberSchema],
 
 }, { timestamps: true });
+
+// Add index for members.userId to improve query performance
+ProjectSchema.index({ "members.userId": 1 });
 
 export default mongoose.models.Project || mongoose.model("Project", ProjectSchema);

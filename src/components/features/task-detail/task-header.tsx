@@ -1,21 +1,29 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Task } from "@/lib/types";
-import { Calendar, Flag, User, CheckCircle2 } from "lucide-react";
+import { Task, Project } from "@/lib/types";
+import { Calendar, Flag, User, CheckCircle2, Pencil } from "lucide-react";
 import { format } from "date-fns";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
+import EditTaskForm from "./forms/edit-task-form";
+import DeleteTaskButton from "./delete-task-button";
 
 type TaskHeaderProps = {
   task: Task;
+  project: Project;
 };
 
-export function TaskHeader({ task }: TaskHeaderProps) {
+export function TaskHeader({ task, project }: TaskHeaderProps) {
+  const [editOpen, setEditOpen] = useState(false);
+
   // Get status config with colors
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -91,21 +99,48 @@ export function TaskHeader({ task }: TaskHeaderProps) {
     <Card className="border-l-4" style={{ borderLeftColor: statusConfig.color.replace('bg-', '#') }}>
       <CardHeader>
         <div className="space-y-4">
-          {/* Title and Badges */}
-          <div className="space-y-3">
-            <CardTitle className="text-3xl font-bold leading-tight">
-              {task.title}
-            </CardTitle>
+          {/* Title, Badges and Actions */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-3 flex-1">
+              <CardTitle className="text-3xl font-bold leading-tight">
+                {task.title}
+              </CardTitle>
 
-            <div className="flex flex-wrap gap-2">
-              <Badge className={statusConfig.className}>
-                <CheckCircle2 className="mr-1 h-3 w-3" />
-                {statusConfig.label}
-              </Badge>
-              <Badge className={priorityConfig.className}>
-                <Flag className="mr-1 h-3 w-3" />
-                {priorityConfig.label}
-              </Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge className={statusConfig.className}>
+                  <CheckCircle2 className="mr-1 h-3 w-3" />
+                  {statusConfig.label}
+                </Badge>
+                <Badge className={priorityConfig.className}>
+                  <Flag className="mr-1 h-3 w-3" />
+                  {priorityConfig.label}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Edit and Delete Buttons */}
+            <div className="flex gap-2">
+              <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-4xl">
+                  <EditTaskForm
+                    task={task}
+                    project={project}
+                    onSuccess={() => setEditOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+
+              <DeleteTaskButton
+                taskId={task._id}
+                taskTitle={task.title}
+                projectId={task.projectId}
+              />
             </div>
           </div>
 
