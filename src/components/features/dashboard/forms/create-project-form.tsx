@@ -63,8 +63,8 @@ export default function CreateProjectForm({ onSuccess }: Props) {
         </div>
       </div>
 
-      {state?.message && (
-        <p className="text-sm text-destructive">{state.message}</p>
+      {state?.error && (
+        <p className="text-sm text-destructive">{state.error}</p>
       )}
 
       <DialogFooter>
